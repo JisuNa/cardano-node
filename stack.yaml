@@ -60,7 +60,7 @@ extra-deps:
   - websockets-0.12.6.1
 
   - git: https://github.com/input-output-hk/cardano-ledger-specs
-    commit: b82a3393d19d1caaa45df6875d925e4d87db5ff5
+    commit: bcadc46b91b96bdd026710749a982a2225749919
     subdirs:
       # small-steps
       - semantics/executable-spec
@@ -116,14 +116,10 @@ extra-deps:
   - libsystemd-journal-1.4.4
   - katip-0.8.4.0
 
-    # Extracted from cardano-sl since it's quite useful
-  - git: https://github.com/input-output-hk/cardano-sl-x509
-    commit: 43a036c5bbe68ca2e9cbe611eab7982e2348fe49
-
     #Ouroboros-network dependencies
 
   - git: https://github.com/input-output-hk/ouroboros-network
-    commit: fbfae1dbed1f22ba4cceacd881e60a2bc25a39d3
+    commit: 7454eaca85e3ffc298e973767316ab2eac2bbe7b
     subdirs:
         - io-sim
         - io-sim-classes
@@ -144,12 +140,6 @@ extra-deps:
     commit: 42a83192749774268337258f4f94c97584b80ca6
     subdirs:
         - cborg
-
-    # Includes a windows build fix (https://github.com/snoyberg/http-client/pull/430)
-  - git: https://github.com/snoyberg/http-client.git
-    commit: 1a75bdfca014723dd5d40760fad854b3f0f37156
-    subdirs:
-        - http-client
 
 nix:
     shell-file: nix/stack-shell.nix
