@@ -329,7 +329,7 @@ instance HasTextFormatter (TraceTxSubmissionOutbound txid tx) where
   formatText _ = pack . show . toList
 
 
-instance Transformable Text IO (TraceKeepAliveClient remotePeer) where
+instance Show remotePeer => Transformable Text IO (TraceKeepAliveClient remotePeer) where
   trTransformer = trStructuredText
 instance HasTextFormatter (TraceKeepAliveClient peer) where
   formatText _ = pack . show . toList
@@ -600,10 +600,11 @@ instance (Show txid, Show tx)
       ]
 
 
-instance ToObject (TraceKeepAliveClient peer) where
-  toObject _verb _ = -- TODO the constructor of this type is hidden
+instance Show remotePeer => ToObject (TraceKeepAliveClient remotePeer) where
+  toObject _verb ev =
     mkObject
-      [ "kind" .= String "AddSample"
+      [ "kind" .= String "TraceKeepAliveClient"
+      , "event" .= show ev
       ]
 
 
