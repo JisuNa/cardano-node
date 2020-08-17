@@ -13,9 +13,9 @@ import           Cardano.Prelude
 import           Prelude (String)
 
 import qualified Data.Aeson as Aeson
-import qualified Data.Text as Text
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.ByteString.Lazy as LBS
+import qualified Data.Text as Text
 
 import           Control.Monad.Trans.Except (ExceptT)
 import           Control.Monad.Trans.Except.Extra (firstExceptT, handleIOExceptT, hoistEither, left,
@@ -296,7 +296,7 @@ readProtocolParameters (ProtocolParamsFile fpath) = do
   firstExceptT (ShelleyTxAesonDecodeProtocolParamsError fpath . Text.pack) . hoistEither $
     Aeson.eitherDecode' pparams
 
-data SomeWitnessSigningKey
+data PotentialWitness
   = AByronSigningKey           (Api.SigningKey Api.ByronKey)
   | APaymentSigningKey         (Api.SigningKey Api.PaymentKey)
   | APaymentExtendedSigningKey (Api.SigningKey Api.PaymentExtendedKey)
@@ -309,10 +309,11 @@ data SomeWitnessSigningKey
   | AGenesisDelegateExtendedSigningKey
                                (Api.SigningKey Api.GenesisDelegateExtendedKey)
   | AGenesisUTxOSigningKey     (Api.SigningKey Api.GenesisUTxOKey)
+  | AShelleyMultiSigScript     Api.MultiSigScript
 
 readSigningKeyFile
   :: SigningKeyFile
-  -> ExceptT (Api.FileError Api.TextEnvelopeError) IO SomeWitnessSigningKey
+  -> ExceptT (Api.FileError Api.TextEnvelopeError) IO PotentialWitness
 readSigningKeyFile (SigningKeyFile skfile) =
     newExceptT $
       Api.readFileTextEnvelopeAnyOf fileTypes skfile
@@ -342,9 +343,9 @@ readSigningKeyFile (SigningKeyFile skfile) =
                           AGenesisUTxOSigningKey
       ]
 
-categoriseWitnessSigningKey :: SomeWitnessSigningKey
+categoriseWitnessSigningKey :: PotentialWitness
                             -> Either (Api.SigningKey Api.ByronKey)
-                                       Api.ShelleyWitnessSigningKey
+                                       Api.ShelleyWitness
 categoriseWitnessSigningKey swsk =
   case swsk of
     AByronSigningKey           sk -> Left sk
@@ -359,6 +360,7 @@ categoriseWitnessSigningKey swsk =
     AGenesisDelegateExtendedSigningKey sk
                                   -> Right (Api.WitnessGenesisDelegateExtendedKey sk)
     AGenesisUTxOSigningKey     sk -> Right (Api.WitnessGenesisUTxOKey     sk)
+    AShelleyMultiSigScript scr -> Right ()
 
 runTxGetTxId :: TxBodyFile -> ExceptT ShelleyTxCmdError IO ()
 runTxGetTxId (TxBodyFile txbodyFile) = do
